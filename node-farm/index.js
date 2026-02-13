@@ -4,11 +4,11 @@ const url = require('url')
 const replaceTemplate = require('./modules/replaceTemplate')
 
 
-const templateOverview = fs.readFileSync(`./node-farm/templates/overview.html`, 'utf-8')
-const templatePrduct = fs.readFileSync(`./node-farm/templates/product.html`, 'utf-8')
-const templateCard = fs.readFileSync(`./node-farm/templates/card.html`, 'utf-8')
+const templateOverview = fs.readFileSync(`./templates/overview.html`, 'utf-8')
+const templatePrduct = fs.readFileSync(`./templates/product.html`, 'utf-8')
+const templateCard = fs.readFileSync(`./templates/card.html`, 'utf-8')
 
-const data = fs.readFileSync('./node-farm/dev-data/data.json', 'utf-8')
+const data = fs.readFileSync('./dev-data/data.json', 'utf-8')
 const dataObject = JSON.parse(data)
 
 const server = http.createServer((req, res) => {
