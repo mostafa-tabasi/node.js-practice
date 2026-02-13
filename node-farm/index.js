@@ -1,12 +1,12 @@
-import fs, { readFileSync } from 'fs';
-import http from 'http'
-import url from 'url'
+const fs = require('fs')
+const http = require('http')
+const url = require('url')
 
 const replaceTemplate = (temp, product) => {
     let output = temp.replace(/{%PRODUCTNAME%}/g, product.productName)
     output = output.replace(/{%IMAGE%}/g, product.image)
     output = output.replace(/{%PRICE%}/g, product.price)
-    output = output.replace(/{%fROM%}/g, product.from)
+    output = output.replace(/{%FROM%}/g, product.from)
     output = output.replace(/{%NUTRIENTS%}/g, product.nutrients)
     output = output.replace(/{%QUANTITY%}/g, product.quantity)
     output = output.replace(/{%DESCRIPTION%}/g, product.description)
@@ -25,10 +25,10 @@ const dataObject = JSON.parse(data)
 
 const server = http.createServer((req, res) => {
     console.log(req.url)
-    const pathName = req.url
+    const { query, pathname } = url.parse(req.url, true)
 
     // Overview page
-    if (pathName === '/' || pathName === '/overview') {
+    if (pathname === '/' || pathname === '/overview') {
         res.writeHead(200, { 'content-type': 'text/html' })
 
         const cardsHtml = dataObject.map(element => replaceTemplate(templateCard, element)).join('')
@@ -37,11 +37,16 @@ const server = http.createServer((req, res) => {
         res.end(output)
 
         //product page
-    } else if (pathName === '/product') {
-        res.end('Hello from the PRODUCT!')
+    } else if (pathname === '/product') {
+        res.writeHead(200, { 'content-type': 'text/html' })
+
+        const product = dataObject[query.id]
+        const output = replaceTemplate(templatePrduct, product)
+        
+        res.end(output)
 
         // API
-    } else if (pathName === '/api') {
+    } else if (pathname === '/api') {
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(data)
 
