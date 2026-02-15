@@ -19,18 +19,9 @@ app.get("/api/v1/tours", (req, res) => {
 
 app.get("/api/v1/tours/:id", (req, res) => {
     const id = req.params.id * 1 //to convert the number string to int
-
-    // tour validity solution #1
-    // if (id > tours.length) {
-    //     return res.status(404).json({
-    //         status: "fail",
-    //         message: "Invalid ID"
-    //     })
-    // }
-
     const tour = tours.find(el => el.id === id)
 
-    // tour validity solution #2
+    // tour validity solution #1
     if (!tour) {
         return res.status(404).json({
             status: "fail",
@@ -64,6 +55,26 @@ app.post("/api/v1/tours", (req, res) => {
             })
         })
 });
+
+app.patch("/api/v1/tours/:id", (req, res) => {
+    const tourId = req.params.id * 1
+    // tour validity solution #2
+    if (tourId > tours.length) {
+        return res.status(404).json({
+            status: "fail",
+            message: "Invalid ID"
+        })
+    }
+
+    // for learning porpuses we didn't implement the actual logic
+    // just a place holder
+    res.status(200).json({
+        status: "success",
+        data: {
+            tour: "<Updated tour data here...>"
+        }
+    })
+})
 
 const port = 3000;
 app.listen(port, () => {
