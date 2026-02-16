@@ -2,22 +2,22 @@ const fs = require("fs");
 const express = require("express");
 const app = express();
 
-// the middleware we need to read the request body
+// the middleware we need to read the request's body
 app.use(express.json());
 
 const tours = JSON.parse(
     fs.readFileSync(`${__dirname}/dev-data/tours-simple.json`)
 );
 
-app.get("/api/v1/tours", (req, res) => {
+const getAllTours = (req, res) => {
     res.status(200).json({
         status: "success",
         results: tours.length,
         data: { tours }
     });
-});
+};
 
-app.get("/api/v1/tours/:id", (req, res) => {
+const getTour = (req, res) => {
     const id = req.params.id * 1 //to convert the number string to int
     const tour = tours.find(el => el.id === id)
 
@@ -35,9 +35,9 @@ app.get("/api/v1/tours/:id", (req, res) => {
             tour
         }
     })
-})
+};
 
-app.post("/api/v1/tours", (req, res) => {
+const createTour = (req, res) => {
     const newId = tours[tours.length - 1].id + 1;
     const newTour = Object.assign({ id: newId }, req.body);
 
@@ -54,9 +54,9 @@ app.post("/api/v1/tours", (req, res) => {
                 }
             })
         })
-});
+};
 
-app.patch("/api/v1/tours/:id", (req, res) => {
+const updateTour = (req, res) => {
     const tourId = req.params.id * 1
     // tour validity solution #2
     if (tourId > tours.length) {
@@ -74,9 +74,9 @@ app.patch("/api/v1/tours/:id", (req, res) => {
             tour: "<Updated tour data here...>"
         }
     })
-})
+};
 
-app.delete("/api/v1/tours/:id", (req, res) => {
+const deleteTour = (req, res) => {
     const tourId = req.params.id * 1
     // tour validity solution #2
     if (tourId > tours.length) {
@@ -92,7 +92,16 @@ app.delete("/api/v1/tours/:id", (req, res) => {
         status: "success",
         data: null
     })
-})
+};
+
+app.route("/api/v1/tours")
+    .get(getAllTours)
+    .post(createTour)
+
+app.route("/api/v1/tours/:id")
+    .get(getTour)
+    .patch(updateTour)
+    .delete(deleteTour)
 
 const port = 3000;
 app.listen(port, () => {
