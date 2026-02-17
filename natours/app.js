@@ -4,10 +4,11 @@ const app = express();
 const tourRouter = require("./routes/tourRoutes");
 const userRouter = require("./routes/userRoutes");
 
-// 1) MIDDLEWARES
+// MIDDLEWARES
 // we set these middlewares for all routes
 // the middleware we need to read the request's body
 app.use(express.json());
+// middleware for logging requests and responses
 app.use(morgan("dev"));
 app.use((req, res, next) => {
   console.log("Hello from the middleware");
@@ -18,13 +19,8 @@ app.use((req, res, next) => {
   next();
 });
 
-// 3) ROUTES
 // we set these two middlewares only for specific routes
 app.use("/api/v1/tours", tourRouter);
 app.use("/api/v1/users", userRouter);
 
-// 4) START SERVER
-const port = 3000;
-app.listen(port, () => {
-  console.log(`App running on port ${port}...`);
-});
+module.exports = app;
