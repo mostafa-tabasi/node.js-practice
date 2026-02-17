@@ -8,8 +8,10 @@ const userRouter = require("./routes/userRoutes");
 // we set these middlewares for all routes
 // the middleware we need to read the request's body
 app.use(express.json());
-// middleware for logging requests and responses
-app.use(morgan("dev"));
+// middleware for logging requests and responses (in development only)
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
+}
 app.use((req, res, next) => {
   console.log("Hello from the middleware");
   next();
