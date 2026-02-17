@@ -4,6 +4,18 @@ const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/../dev-data/tours-simple.json`),
 );
 
+// param middleware to check ID availability on requests that has ID param
+exports.checkID = (req, res, next, val) => {
+  console.log(`Tour ID is: ${val}`);
+  if (req.params.id * 1 > tours.length) {
+    return res.status(404).json({
+      status: "fail",
+      message: "Invalid ID",
+    });
+  }
+  next();
+};
+
 exports.getAllTours = (req, res) => {
   res.status(200).json({
     status: "success",
@@ -16,14 +28,6 @@ exports.getAllTours = (req, res) => {
 exports.getTour = (req, res) => {
   const id = req.params.id * 1; //to convert the number string to int
   const tour = tours.find((el) => el.id === id);
-
-  // tour validity solution #1
-  if (!tour) {
-    return res.status(404).json({
-      status: "fail",
-      message: "Invalid ID",
-    });
-  }
 
   res.status(200).json({
     status: "success",
@@ -54,15 +58,6 @@ exports.createTour = (req, res) => {
 };
 
 exports.updateTour = (req, res) => {
-  const tourId = req.params.id * 1;
-  // tour validity solution #2
-  if (tourId > tours.length) {
-    return res.status(404).json({
-      status: "fail",
-      message: "Invalid ID",
-    });
-  }
-
   // for learning porpuses we didn't implement the actual logic
   // just a place holder
   res.status(200).json({
@@ -74,15 +69,6 @@ exports.updateTour = (req, res) => {
 };
 
 exports.deleteTour = (req, res) => {
-  const tourId = req.params.id * 1;
-  // tour validity solution #2
-  if (tourId > tours.length) {
-    return res.status(404).json({
-      status: "fail",
-      message: "Invalid ID",
-    });
-  }
-
   // for learning porpuses we didn't implement the actual logic
   // just a place holder
   res.status(204).json({
