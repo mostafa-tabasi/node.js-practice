@@ -77,6 +77,18 @@ exports.getAllTours = async (req, res) => {
       query = query.sort("-createdAt");
     }
 
+    // 3) Field limiting (when user only wants especific fields in the response)
+    if (req.query.fields) {
+      // an example will be like:
+      // 127.0.0.1:3000/api/v1/tours?fields=name,price
+      const fields = req.query.fields.split(",").join(" ");
+      query = query.select(fields);
+    }
+    // in case user didn't spedify any fields, apply a default limiting by not showing the "__v" field
+    else {
+      query = query.select("-__v");
+    }
+
     /*
     // FILTERING SOLUTION #2
     const query = Tour.find()
