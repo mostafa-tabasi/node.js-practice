@@ -37,14 +37,14 @@ exports.getAllTours = async (req, res) => {
   try {
     // BUILD QUERY
     // FILTERING SOLUTION #1
-    // 1) Filtering
+    // 1A) Filtering
     // making a copy of the request query
     const queryObj = { ...req.query };
     const excludedFields = ["page", "sort", "limit", "fields"];
     // remove excluded fields from the query
     excludedFields.forEach((el) => delete queryObj[el]);
 
-    // 2) Advanced Filtering
+    // 1B) Advanced Filtering
     let queryStr = JSON.stringify(queryObj);
     // we need to add a $ sign before these 4 operators (operators in mongodb format)
     // gte => greater than or equal
@@ -58,7 +58,24 @@ exports.getAllTours = async (req, res) => {
     // 127.0.0.1:3000/api/v1/tours?duration[gte]=5
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
 
-    const query = Tour.find(JSON.parse(queryStr));
+    let query = Tour.find(JSON.parse(queryStr));
+
+    // 2) Sorting
+    if (req.query.sort) {
+      // need to replace "," with a blank space " " in the sort query
+      // for the cases that we have more than one field for sorting
+
+      // an example will be like:
+      // 127.0.0.1:3000/api/v1/tours?sort=-price,-ratingsAverage
+      // in this example, the result will be sorted first based on price decending,
+      // and then ratingsAverage decending
+      const sortBy = req.query.sort.split(",").join(" ");
+      query = query.sort(sortBy);
+    }
+    // in case user didn't specify any sorting, apply a default sorting based on "createdAt" field
+    else {
+      query = query.sort("-createdAt");
+    }
 
     /*
     // FILTERING SOLUTION #2
