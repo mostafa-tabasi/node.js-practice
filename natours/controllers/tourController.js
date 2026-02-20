@@ -36,14 +36,29 @@ exports.checkBody = (req, res, next) => {
 exports.getAllTours = async (req, res) => {
   try {
     // BUILD QUERY
-    // making a copy of the request query
     // FILTERING SOLUTION #1
+    // 1) Filtering
+    // making a copy of the request query
     const queryObj = { ...req.query };
     const excludedFields = ["page", "sort", "limit", "fields"];
     // remove excluded fields from the query
     excludedFields.forEach((el) => delete queryObj[el]);
 
-    const query = Tour.find(queryObj);
+    // 2) Advanced Filtering
+    let queryStr = JSON.stringify(queryObj);
+    // we need to add a $ sign before these 4 operators (operators in mongodb format)
+    // gte => greater than or equal
+    // gt => greater than
+    // lte => less than or equal
+    // lt => less than
+    // we added "\b" to both side so the exact operator word will be considered as a match
+    // we added "g" at the end so for every match we add the $ sign, not only the first match
+
+    // an example for a query with duration greater than or equal 5 will be like:
+    // 127.0.0.1:3000/api/v1/tours?duration[gte]=5
+    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+
+    const query = Tour.find(JSON.parse(queryStr));
 
     /*
     // FILTERING SOLUTION #2
