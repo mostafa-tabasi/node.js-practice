@@ -7,6 +7,10 @@ const router = express.Router();
 // router.param("id", tourController.checkID);
 
 router
+  .route("/top-5-tour")
+  .get(tourController.aliasTopTour, tourController.getAllTours);
+
+router
   .route("/")
   .get(tourController.getAllTours)
   // first run checkBody middleware before creating a tour

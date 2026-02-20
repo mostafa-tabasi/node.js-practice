@@ -33,6 +33,13 @@ exports.checkBody = (req, res, next) => {
 };
 */
 
+exports.aliasTopTour = (req, res, next) => {
+  req.query.limit = "5";
+  req.query.sort = "-ratingsAverage,price";
+  req.query.fields = "name,price,ratingsAverage,summary,difficulty";
+  next();
+};
+
 exports.getAllTours = async (req, res) => {
   try {
     // BUILD QUERY
