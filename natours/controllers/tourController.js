@@ -1,5 +1,6 @@
 // const fs = require("fs");
 const Tour = require("./../models/tourModel");
+const APIFeatures = require("./../utils/apiFeatures");
 
 /*
 const tours = JSON.parse(
@@ -42,83 +43,13 @@ exports.aliasTopTour = (req, res, next) => {
 
 exports.getAllTours = async (req, res) => {
   try {
-    // BUILD QUERY
-    // FILTERING SOLUTION #1
-    // 1A) Filtering
-    // making a copy of the request query
-    const queryObj = { ...req.query };
-    const excludedFields = ["page", "sort", "limit", "fields"];
-    // remove excluded fields from the query
-    excludedFields.forEach((el) => delete queryObj[el]);
-
-    // 1B) Advanced Filtering
-    let queryStr = JSON.stringify(queryObj);
-    // we need to add a $ sign before these 4 operators (operators in mongodb format)
-    // gte => greater than or equal
-    // gt => greater than
-    // lte => less than or equal
-    // lt => less than
-    // we added "\b" to both side so the exact operator word will be considered as a match
-    // we added "g" at the end so for every match we add the $ sign, not only the first match
-
-    // an example for a query with duration greater than or equal 5 will be like:
-    // 127.0.0.1:3000/api/v1/tours?duration[gte]=5
-    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
-
-    let query = Tour.find(JSON.parse(queryStr));
-
-    // 2) Sorting
-    if (req.query.sort) {
-      // need to replace "," with a blank space " " in the sort query
-      // for the cases that we have more than one field for sorting
-
-      // an example will be like:
-      // 127.0.0.1:3000/api/v1/tours?sort=-price,-ratingsAverage
-      // in this example, the result will be sorted first based on price decending,
-      // and then ratingsAverage decending
-      const sortBy = req.query.sort.split(",").join(" ");
-      query = query.sort(sortBy);
-    }
-    // in case user didn't specify any sorting, apply a default sorting based on "createdAt" field
-    else {
-      query = query.sort("-createdAt");
-    }
-
-    // 3) Field limiting (when user only wants especific fields in the response)
-    if (req.query.fields) {
-      // an example will be like:
-      // 127.0.0.1:3000/api/v1/tours?fields=name,price
-      const fields = req.query.fields.split(",").join(" ");
-      query = query.select(fields);
-    }
-    // in case user didn't spedify any fields, apply a default limiting by not showing the "__v" field
-    else {
-      query = query.select("-__v");
-    }
-
-    // 4) Pagination
-    const page = req.query.page * 1 || 1;
-    const limit = req.query.limit * 1 || 100;
-    const skip = (page - 1) * limit;
-
-    query = query.skip(skip).limit(limit);
-
-    if (req.query.page) {
-      const numTours = await Tour.countDocuments();
-      if (skip >= numTours) throw new Error("This page does not exist");
-    }
-
-    /*
-    // FILTERING SOLUTION #2
-    const query = Tour.find()
-      .where("duration")
-      .equals(5)
-      .where("difficulty")
-      .equals("easy");
-    */
-
+    const features = new APIFeatures(Tour.find(), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
     // EXECUTE QUERY
-    const tours = await query;
+    const tours = await features.query;
 
     // SEND RESPONSE
     res.status(200).json({
