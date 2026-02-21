@@ -7,6 +7,14 @@ const router = express.Router();
 // router.param("id", tourController.checkID);
 
 router
+  .route("/top-5-tour")
+  .get(tourController.aliasTopTour, tourController.getAllTours);
+
+router.route("/stats").get(tourController.getTourStats);
+
+router.route("/monthly-plan/:year").get(tourController.getMonthlyPlan);
+
+router
   .route("/")
   .get(tourController.getAllTours)
   // first run checkBody middleware before creating a tour
@@ -17,11 +25,5 @@ router
   .get(tourController.getTour)
   .patch(tourController.updateTour)
   .delete(tourController.deleteTour);
-
-router
-  .route("/top-5-tour")
-  .get(tourController.aliasTopTour, tourController.getAllTours);
-
-router.route("/stats").get(tourController.getTourStats);
 
 module.exports = router;
