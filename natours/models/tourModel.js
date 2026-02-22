@@ -75,6 +75,7 @@ tourSchema.virtual("durationWeeks").get(function () {
 
 // DOCUMENT MIDDLEWARE: runs before .save() and .create() operator
 // we can have multiple pre or post middleware
+// ("this" ketword inside this function refers to the document)
 tourSchema.pre("save", function (next) {
   this.slug = slugify(this.name, { lower: true });
   next();
@@ -87,6 +88,7 @@ tourSchema.post("save", function (doc, next) {
 });
 
 // QUERY MIDDLEWARE: runs before any query that start with "find"
+// ("this" ketword inside this function refers to the query)
 tourSchema.pre(/^find/, function (next) {
   // we're gonna hide all the secret tours from the query
   this.find({ secretTour: { $ne: true } });
@@ -97,6 +99,17 @@ tourSchema.pre(/^find/, function (next) {
 
 tourSchema.post(/^find/, function (docs, next) {
   console.log(`Query took ${Date.now() - this.start} milliseconds`);
+  next();
+});
+
+// AGGREGTION MIDDLEWARE ("this" ketword inside this function refers to the aggregation)
+tourSchema.pre("aggregate", function (next) {
+  // to add an object in the beginning of an array we use .unshift()
+  // to add an object in the end of an array we use .shift()
+  // here we want to add another $match aggregate to the pipeline to exclude the secret tour
+  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+
+  console.log(this.pipeline());
   next();
 });
 
