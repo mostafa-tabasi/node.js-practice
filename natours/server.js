@@ -22,6 +22,15 @@ mongoose
   });
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`App running on port ${port}...`);
+});
+
+// handling promiss rejections out of express
+process.on("unhandledRejection", (err) => {
+  console.log(err.name, err.message);
+  server.close(() => {
+    // 0 for closing with success and 1 for error
+    process.exit(1);
+  });
 });
