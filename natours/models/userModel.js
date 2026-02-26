@@ -19,6 +19,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, "Please provide a password"],
     minLength: 8,
+    select: false,
   },
   passwordConfirm: {
     type: String,
@@ -46,6 +47,16 @@ userSchema.pre("save", async function (next) {
 
   next();
 });
+
+// because we set "select" property to false for password field,
+// we can't use "this" keyword to have access to password field in the current document
+// so we have to pass userPassword to the function
+userSchema.methods.correctPassword = async function (
+  condidatePassword,
+  userPassword,
+) {
+  return await bcrypt.compare(condidatePassword, userPassword);
+};
 
 const User = mongoose.model("User", userSchema);
 
