@@ -57,6 +57,16 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+userSchema.pre("save", function (next) {
+  // If password is not modified or this document is new, no need to continue
+  if (!this.isModified("password") || this.isNew) return next();
+
+  // sometimes this field gets created with a bit of delay
+  // so we minus it to 1 sec to prevent issue with generating tokens
+  this.passwordChangedAt = Date.now() - 1000;
+  next();
+});
+
 // because we set "select" property to false for password field,
 // we can't use "this" keyword to have access to password field in the current document
 // so we have to pass userPassword to the function
@@ -91,7 +101,7 @@ userSchema.methods.createPasswordResetToken = function () {
     .digest("hex");
 
   // password reset token will only be valid for 10 minutes
-  this.passwordResetExpires = Date.now() + 10 * 6 * 1000;
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
 
   return resetToken;
 };
