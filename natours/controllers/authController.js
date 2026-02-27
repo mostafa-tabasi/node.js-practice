@@ -18,6 +18,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     email: req.body.email,
     password: req.body.password,
     passwordConfirm: req.body.passwordConfirm,
+    role: req.body.role,
   });
 
   const token = signToken(newUser._id);
@@ -98,7 +99,21 @@ exports.protect = catchAsync(async (req, res, next) => {
     );
   }
 
-  // 5) Grant access to protected route
+  // 5) Grant access to protected route and pass the user to the next middleware
   req.user = user;
   next();
 });
+
+// since we need to pass the roles list to the middleware,
+// we need to write it in this way.
+exports.restrictTo = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new AppError("You do not have permission to perform this action", 403),
+      );
+    }
+
+    next();
+  };
+};
